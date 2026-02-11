@@ -6,7 +6,7 @@ Aplikasi ujian online berbasis web sederhana menggunakan PHP Native dan MySQL.
 - Login Siswa & Admin
 - Timer Mundur Realtime
 - Soal Pilihan Ganda & Esai
-- Support Gambar & Audio pada Soal
+- Support Gambar pada Soal
 - Rekap Nilai Otomatis
 - Anti-Cheat Sederhana (Fullscreen Warning)
 
@@ -19,6 +19,12 @@ Aplikasi ujian online berbasis web sederhana menggunakan PHP Native dan MySQL.
 ## Akun Demo
 - **Admin**: Username `123`, Password `123`
 - **Siswa**: NIM `1`, Password `1`
+
+## to do 
+- perbaiki timer
+- upgrade Admin page
+- fitur multiple admin
+- user home page ?
 
 ## Catatan
 Project ini dibuat untuk tujuan edukasi. Password disimpan tanpa enkripsi untuk memudahkan pembelajaran logika dasar PHP.
