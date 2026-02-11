@@ -1,0 +1,17 @@
+/**
+ Export to JSON plugin for PHPMyAdmin
+ @version 0.1
+ */
+
+// Database 'ujian_db'
+// ujian_db.admin
+
+[{"id":"1","username":"asd","password":"asd"}]// ujian_db.matakuliah
+
+[{"id":"1","nama_mk":"Ornithologi","kode_mk":"BIO101"}, {"id":"2","nama_mk":"Fotografi Biologi","kode_mk":"BIO102"}, {"id":"3","nama_mk":"Ekowisata Jatimulyo","kode_mk":"BIO103"}]// ujian_db.pengaturan
+
+[{"id":"1","mk_aktif_id":"1"}]// ujian_db.siswa
+
+[{"id":"1","nim":"123","password":"123","nama_lengkap":"Budi Santoso","kelas":"Ornithologi A","is_online":"1","last_ip":"::1","created_at":"2026-02-06 23:52:01","last_ping":"2026-02-07 18:22:25"}, {"id":"2","nim":"K4123002","password":"mhs123","nama_lengkap":"Siti Aminah","kelas":"Ornithologi A","is_online":"0","last_ip":null,"created_at":"2026-02-06 23:52:01","last_ping":"2026-02-07 00:16:01"}]// ujian_db.soal
+
+[{"id":"1","matakuliah_id":"1","tipe":"pilgan","pertanyaan":"Burung apa yang memiliki suara kicauan paling kompleks di hutan hujan tropis?","media":null,"opsi_a":"Murai Batu","opsi_b":"Cendrawasih","opsi_c":"Elang Jawa","opsi_d":"Pipit","kunci":"A","durasi_detik":"60"}, {"id":"2","matakuliah_id":"1","tipe":"pilgan","pertanyaan":"Perhatikan gambar berikut. Spesies apakah ini?","media":"elang_jawa.jpg","opsi_a":"Nisaetus bartelsi","opsi_b":"Haliastur indus","opsi_c":"Spilornis cheela","opsi_d":"Ictinaetus malaiensis","kunci":"A","durasi_detik":"120"}, {"id":"3","matakuliah_id":"1","tipe":"pilgan","pertanyaan":"Ini my Bini Benar atau salah","media":"soal_1770397510_548540666_18286547719280995_4133981724397067985_n.jpg","opsi_a":"Benar","opsi_b":"benar","opsi_c":"iy benar yang mulia","opsi_d":"anda tidk pernah salah yang mulia","kunci":"A","durasi_detik":"12"}, {"id":"4","matakuliah_id":"1","tipe":"esai","pertanyaan":"my bini","media":"soal_1770398014_548540666_18286547719280995_4133981724397067985_n.jpg","opsi_a":"","opsi_b":"","opsi_c":"","opsi_d":"","kunci":"A","durasi_detik":"60"}, {"id":"5","matakuliah_id":"1","tipe":"esai","pertanyaan":"asd","media":"soal_1770432462_WhatsApp_Image_2026-01-31_at_11.39.05.jpeg","opsi_a":"","opsi_b":"","opsi_c":"","opsi_d":"","kunci":"A","durasi_detik":"60"}, {"id":"6","matakuliah_id":"1","tipe":"pilgan","pertanyaan":"dsadsa","media":"","opsi_a":"gfdhg","opsi_b":"jkhb","opsi_c":"yjhkbmn","opsi_d":"yhkn","kunci":"A","durasi_detik":"60"}]
