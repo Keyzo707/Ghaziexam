@@ -17,8 +17,8 @@ Aplikasi ujian online berbasis web sederhana menggunakan PHP Native dan MySQL.
 4. Buka di browser (localhost).
 
 ## Akun Demo
-- **Admin**: Username `admin`, Password `admin`
-- **Siswa**: NIM `12345`, Password `12345`
+- **Admin**: Username `123`, Password `123`
+- **Siswa**: NIM `1`, Password `1`
 
 ## Catatan
 Project ini dibuat untuk tujuan edukasi. Password disimpan tanpa enkripsi untuk memudahkan pembelajaran logika dasar PHP.
