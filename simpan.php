@@ -7,58 +7,91 @@ include 'koneksi.php';
 // ==========================================
 if (isset($_POST['soal_id']) && isset($_POST['jawaban'])) {
     
+    // ✅ CSRF Token Validation
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        echo json_encode(['status' => 'error', 'msg' => 'Invalid CSRF token']);
+        exit;
+    }
+
     // Cek Login Siswa
     if (!isset($_SESSION['siswa_id'])) {
         echo json_encode(['status' => 'error', 'msg' => 'Sesi habis']);
         exit;
     }
 
-    $siswa_id = $_SESSION['siswa_id'];
-    $soal_id  = $_POST['soal_id'];
-    $jawaban  = $_POST['jawaban'];
+    // ✅ SQL Injection Protection - Integer Validation
+    $siswa_id = intval($_SESSION['siswa_id']);
+    $soal_id = intval($_POST['soal_id']);
+    $jawaban = mysqli_real_escape_string($conn, $_POST['jawaban']);
 
-    // Cek apakah sudah ada jawaban sebelumnya untuk soal ini?
+    // ✅ SERVER-SIDE TIMER VALIDATION
+    $q_ujian_time = mysqli_query($conn, "SELECT waktu_mulai, mk_id FROM ujian_mahasiswa WHERE siswa_id='$siswa_id' LIMIT 1");
+    
+    if (mysqli_num_rows($q_ujian_time) == 0) {
+        echo json_encode(['status' => 'error', 'msg' => 'Data ujian tidak ditemukan']);
+        exit;
+    }
+
+    $ujian_time = mysqli_fetch_assoc($q_ujian_time);
+    $mk_id = intval($ujian_time['mk_id']);
+    
+    $q_durasi = mysqli_query($conn, "SELECT durasi_menit FROM pengaturan WHERE mk_aktif_id='$mk_id'");
+    $durasi_data = mysqli_fetch_assoc($q_durasi);
+    $durasi_menit = intval($durasi_data['durasi_menit']);
+    
+    $start_time = strtotime($ujian_time['waktu_mulai']);
+    $end_time = $start_time + ($durasi_menit * 60);
+    $current_time = time();
+    $sisa_waktu = $end_time - $current_time;
+
+    if ($sisa_waktu <= 0) {
+        echo json_encode(['status' => 'error', 'msg' => 'Waktu ujian telah habis!']);
+        mysqli_query($conn, "UPDATE ujian_mahasiswa SET status='selesai' WHERE siswa_id='$siswa_id' AND mk_id='$mk_id'");
+        exit;
+    }
+
     $cek = mysqli_query($conn, "SELECT id FROM log_ujian WHERE siswa_id='$siswa_id' AND soal_id='$soal_id'");
 
     if (mysqli_num_rows($cek) > 0) {
-        // Jika sudah ada, UPDATE
         $query = "UPDATE log_ujian SET jawaban_siswa='$jawaban', waktu_simpan=NOW() WHERE siswa_id='$siswa_id' AND soal_id='$soal_id'";
     } else {
-        // Jika belum ada, INSERT (BARU)
         $query = "INSERT INTO log_ujian (siswa_id, soal_id, jawaban_siswa, waktu_simpan) VALUES ('$siswa_id', '$soal_id', '$jawaban', NOW())";
     }
 
     if (mysqli_query($conn, $query)) {
-        echo json_encode(['status' => 'success']);
+        echo json_encode(['status' => 'success', 'sisa_waktu' => $sisa_waktu]);
     } else {
         echo json_encode(['status' => 'error', 'msg' => mysqli_error($conn)]);
     }
-    exit; // Stop agar tidak lanjut ke logika admin
+    exit;
 }
-
 
 // ==========================================
 // 2. LOGIKA UNTUK ADMIN (SETTING UJIAN)
 // ==========================================
 if (isset($_POST['simpan_pengaturan'])) {
     
-    // Cek Login Admin
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        die("<script>alert('Invalid CSRF token'); window.location='simpan.php';</script>");
+    }
+
     if (!isset($_SESSION['admin_logged_in'])) {
         header("Location: login_admin.php");
         exit;
     }
 
-    $mk_id  = $_POST['mk_aktif_id'];
-    $durasi = $_POST['durasi_menit'];
+    $mk_id = intval($_POST['mk_aktif_id']);
+    $durasi = intval($_POST['durasi_menit']);
 
-    // Cek apakah data pengaturan sudah ada (ID=1)
+    if ($durasi < 1 || $durasi > 480) {
+        die("<script>alert('Durasi harus antara 1-480 menit'); window.location='simpan.php';</script>");
+    }
+
     $cek = mysqli_query($conn, "SELECT id FROM pengaturan WHERE id = 1");
     
     if (mysqli_num_rows($cek) > 0) {
-        // Update
         $query = "UPDATE pengaturan SET mk_aktif_id = '$mk_id', durasi_menit = '$durasi' WHERE id = 1";
     } else {
-        // Insert
         $query = "INSERT INTO pengaturan (id, mk_aktif_id, durasi_menit) VALUES (1, '$mk_id', '$durasi')";
     }
 
@@ -73,13 +106,15 @@ if (isset($_POST['simpan_pengaturan'])) {
 // ==========================================
 // 3. TAMPILAN HALAMAN ADMIN (FORM SETTING)
 // ==========================================
-// Bagian ini hanya muncul jika Admin membuka simpan.php di browser
 if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login_admin.php");
     exit;
 }
 
-// Ambil data saat ini untuk ditampilkan di form
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 $q_set = mysqli_query($conn, "SELECT * FROM pengaturan WHERE id = 1");
 $current = mysqli_fetch_assoc($q_set);
 $cur_mk = isset($current['mk_aktif_id']) ? $current['mk_aktif_id'] : '';
@@ -103,6 +138,8 @@ $cur_durasi = isset($current['durasi_menit']) ? $current['durasi_menit'] : 60;
                 </div>
                 <div class="card-body">
                     <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                        
                         <div class="mb-3">
                             <label class="form-label fw-bold">Pilih Mata Kuliah Ujian</label>
                             <select name="mk_aktif_id" class="form-select" required>
@@ -120,7 +157,7 @@ $cur_durasi = isset($current['durasi_menit']) ? $current['durasi_menit'] : 60;
                         </div>
                         <div class="mb-4">
                             <label class="form-label fw-bold">Durasi Pengerjaan (Menit)</label>
-                            <input type="number" name="durasi_menit" class="form-control" value="<?= $cur_durasi ?>" min="1" required>
+                            <input type="number" name="durasi_menit" class="form-control" value="<?= $cur_durasi ?>" min="1" max="480" required>
                         </div>
                         <div class="d-grid gap-2">
                             <button type="submit" name="simpan_pengaturan" class="btn btn-success">SIMPAN & AKTIFKAN</button>
